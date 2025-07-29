@@ -257,6 +257,7 @@
                 this.recognition = null;
                 this.isRecording = false;
                 this.results = [];
+                this.content = ''; // 実際のアプリと同じcontent変数
                 this.stats = {
                     totalAttempts: 0,
                     successfulAttempts: 0,
@@ -277,13 +278,11 @@
                     this.recognition.lang = 'ja-JP';
                     this.recognition.continuous = false;
                     
-                    // 基本的なイベントリスナーのみ
+                    // 実際のアプリと同じ実装
                     this.recognition.addEventListener('result', (event) => {
+                        // 結果を即座に処理せず、contentに保存
                         if (event.results.length > 0) {
-                            const transcript = event.results[0][0].transcript.trim();
-                            const confidence = event.results[0][0].confidence;
-                            
-                            this.addResult(transcript, confidence);
+                            this.content = event.results[0][0].transcript.trim();
                         }
                     });
                     
@@ -291,6 +290,16 @@
                         this.isRecording = false;
                         this.updateStatus('音声認識終了', 'idle');
                         this.updateButtons();
+                        
+                        // 実際のアプリと同じ処理
+                        if (!this.content) {
+                            console.log('認識結果が空です');
+                            return;
+                        }
+                        
+                        // 結果を処理
+                        this.addResult(this.content, 0.8); // 信頼度は仮の値
+                        this.content = ''; // クリア
                     });
                     
                     this.recognition.addEventListener('error', (event) => {
@@ -383,6 +392,7 @@
             
             clearResults() {
                 this.results = [];
+                this.content = ''; // contentもクリア
                 this.stats = {
                     totalAttempts: 0,
                     successfulAttempts: 0,
